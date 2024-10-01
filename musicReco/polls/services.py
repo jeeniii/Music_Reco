@@ -1,8 +1,9 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from django.conf import settings
 
-client_id = '6b25f06078274ba5b42eb8308bf107ce'
-client_secret = '10a43a425e5e4a229ce7ba63f60a0374'
+client_id = settings.CLIENT_ID
+client_secret = settings.CLIENT_SECRET
 client_credentials_manager = SpotifyClientCredentials(client_id= client_id, client_secret= client_secret)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
