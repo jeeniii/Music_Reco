@@ -15,14 +15,12 @@ def index(request):
     return render(request, 'index.html', {'artists': artists})
 
 def get_tracks(request):
-    print('Request method', request.method) # POST
     if request.method == 'POST':
         body = json.loads(request.body)
         # 선택된 artist ID 가져오기
         artist_ids = body.get('artist_ids',[])
-        print('views -', artist_ids)
         all_tracks = artist_top_tracks(artist_ids)
 
-        return render(request, 'tracks.html', {'tracks':all_tracks})
+        return JsonResponse({'tracks': all_tracks})
         
     return JsonResponse({'error': 'Invalid Request'}, status=400)

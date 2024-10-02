@@ -8,9 +8,8 @@ client_credentials_manager = SpotifyClientCredentials(client_id= client_id, clie
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 def search_artists(artist_name, limit=10):
-    search_artist = sp.search(artist_name, limit=limit, type='artist', market='KR')
-    
     artists_data = []
+    search_artist = sp.search(artist_name, limit=limit, type='artist', market='KR')
     
     for artist in search_artist['artists']['items']:
         artist_data = {
@@ -22,19 +21,20 @@ def search_artists(artist_name, limit=10):
     return artists_data
 
 def artist_top_tracks(artist_ids):
-    print('##Input artist_ids##')
-    print('###artist_ids -', artist_ids)
-    artist_top_tracks = sp.artist_top_tracks(artist_ids, country='KR')
-    print('services -', artist_top_tracks)
-    searched_top_tracks = []
-
-    for top_track in artist_top_tracks['tracks']:
-        top_track_data = {
-            'name': top_track['name'],
-            'id': top_track['id'],
-            'image_url': top_track['album']['images'][-1]['url'] if top_track['album']['images'] else '',
-            'popularity': top_track['popularity']
-        }
-        searched_top_tracks.append(top_track_data)
-    return searched_top_tracks
+    artist_tracks = {}
+    for artist_id in artist_ids:
+        artist_top_tracks = sp.artist_top_tracks(artist_id, country='KR')
+        
+        tracks = []
+        for top_track in artist_top_tracks['tracks']:
+            top_track_data = {
+                'name': top_track['name'],
+                'id': top_track['id'],
+                'image_url': top_track['album']['images'][-1]['url'] if top_track['album']['images'] else '',
+                'popularity': top_track['popularity']
+            }
+            tracks.append(top_track_data)
+        # dictionary[key] = value
+        artist_tracks[artist_id] = tracks
+    return artist_tracks
 

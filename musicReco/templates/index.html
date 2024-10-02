@@ -26,7 +26,7 @@
 </head>
 <body class="bg-gray-100 p-6">
     <!-- 가수 선택 -->
-    <div class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-6">
+    <div id="artistSelectionContainer" class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-6">
         <h1 class="text-2xl font-bold mb-4">가수 검색</h1>
         <div class="relative mb-6">
             <form method="GET" action="">
@@ -66,6 +66,8 @@
         document.addEventListener("DOMContentLoaded", function() {
             const artistsList = document.getElementById("artistsList");
             const actionButton = document.getElementById("actionButton");
+            const trackList = document.getElementById("trackList");
+            const tracksContainer = document.getElementById("tracksContainer");
             const maxSelectedList = 3;
             let selectedItems = [];
             
@@ -105,25 +107,60 @@
             actionButton.addEventListener("click", async function(){
                 // 선택된 artiest ID 배열 생성
                 const selectedArtistIds = selectedItems.map(item => item.getAttribute('data-artist-id'));
-
-                try {
-                    const response = await fetch('/get_tracks/', {
+                // 서버에 데이터 전송
+                const response = await fetch('/get_tracks/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
                     body: JSON.stringify({ artist_ids: selectedArtistIds })
-                });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // 트랙 데이터 html로 출력
+                    trackList.innerHTML='';
+                    // views.py에서 JsonResponse({'tracks': all_tracks}) 이걸로 데이터 받아옴
+                    // 딕셔너리 반복
+                    for (const artistId in data.tracks) {
+                        if (data.tracks.hasOwnProperty(artistId)) {
+                            const tracks = data.tracks[artistId];
+                            
+                            // 각 아티스트의 트랙을 리스트에 추가
+                                tracks.forEach(track => {
+                                const li = document.createElement('li');
+                                li.classList.add('flex', 'item-center', 'mb-4');
 
-                    // 응답 성공
-                    if (response.ok) {
-                        // 페이지 전환
-                        window.location.href = '/tracks/';
+                                // 트랙 이미지 
+                                const img = document.createElement('img');
+                                img.src = track.image_url;  // 이미지
+                                img.alt = track.name;  // 이미지 없을 경우
+                                img.classList.add('w-12', 'h-12', 'rounded-full', 'mr-4');
+
+                                // 트랙 이름
+                                const trackName = document.createElement('p');
+                                trackName.classList.add('font-bold');
+                                trackName.textContent = track.name;
+
+                                // li에 img, name 추가
+                                li.appendChild(img);
+                                li.appendChild(trackName);
+
+                                // 트랙 리스트에 li 추가
+                                trackList.appendChild(li);
+                            });
+                        }
                     }
-                } catch (error) {
+                    // 기본 hidden처리 없애서 트랙 표시
+                    tracksContainer.classList.remove('hidden');
+                    
+                    // 아티스트 선택 화면 숨김
+                    const artistSelectionContainer = document.getElementById('artistSelectionContainer');
+                    artistSelectionContainer.classList.add('hidden');
+                })
+                .catch (error => {
                     console.error('AJAX 요청 중 오류', error);
-                }
+                }) 
             });
         });
     </script>
