@@ -19,6 +19,11 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    # django-debug-toolbar
+    path('__debug__/', include('debug_toolbar.urls')),
+    # admin
     path("admin/", admin.site.urls),
+
+    # app
     path("", include('polls.urls')),
 ]

@@ -18,9 +18,14 @@
         #actionButton {
             display: none;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-6">
+    <!-- 가수 선택 -->
     <div class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-6">
         <h1 class="text-2xl font-bold mb-4">가수 검색</h1>
         <div class="relative mb-6">
@@ -31,6 +36,7 @@
                 <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.387 4.387a1 1 0 01-1.414 1.414l-4.387-4.387zM8 14a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd" />
             </svg>
         </div>
+        <!-- 검색된 가수 리스트 -->
         <ul id="artistsList">
             {% for artist in artists %}
             <li class="flex items-center mb-4" data-artist-id="{{ artist.id }}">
@@ -39,13 +45,22 @@
                     <p class="font-bold">{{ artist.name }}</p>
                 </div>
             </li>
+            <!-- 검색된 가수 없을 경우 -->
             {% empty %}
             <li class="text-gray-500">No artists found.</li>
             {% endfor %}
         </ul>
+        <!-- 가수 선택 후 확인 커맨드 -->
         <div class="mt-4 flex justify-center">
             <button id="actionButton" class="bg-blue-500 text-white py-2 px-4 rounded">선택 완료</button>
         </div>
+    </div>
+    <!-- 선택한 가수의 음악 리스트 -->
+    <div id="tracksContainer" class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-6 hidden">
+        <h1 class="text-2xl font-bold mb-4">음악 선택</h1>
+        <ul id="trackList">
+            <!-- 트랙 데이터 삽입 -->
+        </ul>
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -86,21 +101,29 @@
                 }
             });
 
-            actionButton.addEventListener("click", function(){
+            // 버튼 클릭 시 선택된 artiest ID 서버로 전송
+            actionButton.addEventListener("click", async function(){
+                // 선택된 artiest ID 배열 생성
                 const selectedArtistIds = selectedItems.map(item => item.getAttribute('data-artist-id'));
 
-                fetch('/get_tracks/', {
+                try {
+                    const response = await fetch('/get_tracks/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
                     body: JSON.stringify({ artist_ids: selectedArtistIds })
-                }).then(response => {
+                });
+
+                    // 응답 성공
                     if (response.ok) {
+                        // 페이지 전환
                         window.location.href = '/tracks/';
                     }
-                });
+                } catch (error) {
+                    console.error('AJAX 요청 중 오류', error);
+                }
             });
         });
     </script>
