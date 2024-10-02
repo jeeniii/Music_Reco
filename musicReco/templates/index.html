@@ -10,6 +10,14 @@
         body {
             font-family: 'Noto Sans KR', sans-serif;
         }
+
+        .clicked {
+            background-color: #add8e6;
+        }
+
+        #actionButton {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-6">
@@ -23,9 +31,9 @@
                 <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.387 4.387a1 1 0 01-1.414 1.414l-4.387-4.387zM8 14a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd" />
             </svg>
         </div>
-        <ul>
+        <ul id="artistsList">
             {% for artist in artists %}
-            <li class="flex items-center mb-4">
+            <li class="flex items-center mb-4" data-artist-id="{{ artist.id }}">
                 <img src="{{ artist.image_url }}" alt="{{ artist.name }}" class="w-12 h-12 rounded-full mr-4">
                 <div>
                     <p class="font-bold">{{ artist.name }}</p>
@@ -35,6 +43,66 @@
             <li class="text-gray-500">No artists found.</li>
             {% endfor %}
         </ul>
+        <div class="mt-4 flex justify-center">
+            <button id="actionButton" class="bg-blue-500 text-white py-2 px-4 rounded">선택 완료</button>
+        </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const artistsList = document.getElementById("artistsList");
+            const actionButton = document.getElementById("actionButton");
+            const maxSelectedList = 3;
+            let selectedItems = [];
+            
+            artistsList.addEventListener("click", function(event) {
+                const clickedItem = event.target.closest('li');
+
+                if (clickedItem) {
+                    // 클릭된 항목이 이미 선택된 경우 선택 해제
+                    if (clickedItem.classList.contains('clicked')) {
+                        clickedItem.classList.remove('clicked');
+                        selectedItems = selectedItems.filter(item => item !== clickedItem);
+                    } else {
+                        // 선택된 항목이 3개 미만일 경우에만 선택 가능
+                        if (selectedItems.length < maxSelectedList) {
+                            clickedItem.classList.add('clicked');
+                            selectedItems.push(clickedItem);
+                        } else {
+                            // 이미 3개 선택된 경우, 가장 먼저 선택된 항목 해제
+                            const firstSelectedItem = selectedItems.shift();
+                            firstSelectedItem.classList.remove('clicked');
+
+                            // 새로운 항목을 선택으로 추가
+                            clickedItem.classList.add('clicked');
+                            selectedItems.push(clickedItem);
+                        }
+                    } 
+
+                    if (selectedItems.length > 0) {
+                        actionButton.style.display = 'inline-block';
+                    } else {
+                        actionButton.style.display = 'none';
+                    }
+                }
+            });
+
+            actionButton.addEventListener("click", function(){
+                const selectedArtistIds = selectedItems.map(item => item.getAttribute('data-artist-id'));
+
+                fetch('/get_tracks/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ artist_ids: selectedArtistIds })
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = '/tracks/';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

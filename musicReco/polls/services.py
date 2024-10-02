@@ -15,6 +15,7 @@ def search_artists(artist_name, limit=10):
     for artist in search_artist['artists']['items']:
         artist_data = {
             'name': artist['name'],
+            'id': artist['id'],
             'image_url': artist['images'][-1]['url'] if artist['images'] else '',  # 이미지가 없는 경우 예외 처리
         }
         artists_data.append(artist_data)
