@@ -27,7 +27,7 @@
 <body class="bg-gray-100 p-6">
     <!-- 가수 선택 -->
     <div id="artistSelectionContainer" class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-6">
-        <h1 class="text-2xl font-bold mb-4">가수 검색</h1>
+        <h1 class="text-2xl font-bold mb-4 text-center">가수 검색</h1>
         <div class="relative mb-6">
             <form method="GET" action="">
                 <input type="text" name="search" placeholder="검색" class="w-full border border-gray-300 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" onKeyPress="if (event.keyCode==13) { form.submit(); }">
@@ -57,7 +57,7 @@
     </div>
     <!-- 선택한 가수의 음악 리스트 -->
     <div id="tracksContainer" class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-6 hidden">
-        <h1 class="text-2xl font-bold mb-4">음악 선택</h1>
+        <h1 class="text-2xl font-bold mb-4 text-center">음악 선택</h1>
         <ul id="trackList">
             <!-- 트랙 데이터 삽입 -->
         </ul>
@@ -127,11 +127,11 @@
                             const tracks = data.tracks[artistId];
                             
                             // 각 아티스트의 트랙을 리스트에 추가
-                                tracks.forEach(track => {
+                            tracks.forEach(track => {
                                 const li = document.createElement('li');
-                                li.classList.add('flex', 'item-center', 'mb-4');
+                                li.classList.add('flex', 'item-center', 'justify-between', 'mb-4');
 
-                                // 트랙 이미지 
+                                // 트랙 이미지
                                 const img = document.createElement('img');
                                 img.src = track.image_url;  // 이미지
                                 img.alt = track.name;  // 이미지 없을 경우
@@ -142,9 +142,38 @@
                                 trackName.classList.add('font-bold');
                                 trackName.textContent = track.name;
 
+                                // 재생 아이콘 preview_url이 비어있는 경우를 분기
+                                const playButton = document.createElement('button');
+                                if (track.preview_url === '') {
+                                    playButton.innerHTML = '❌';
+                                    playButton.disabled = 'true';
+                                    playButton.classList.add('ml-auto');
+                                } else {
+                                    playButton.innerHTML = '▶';
+                                    playButton.classList.add('play-button', 'ml-auto');
+                                }
+                                
+                                //오디오 url
+                                const audio = document.createElement('audio');
+                                audio.src = track.preview_url;
+                                audio.classList.add('hidden');
+
+                                playButton.addEventListener('click', function() {
+                                    if (audio.paused) {
+                                        audio.play();
+                                        playButton.innerHTML = '⏸️';
+                                    } else {
+                                        audio.pause();
+                                        playButton.innerHTML = '▶';
+                                    }
+                                });
+
+
                                 // li에 img, name 추가
                                 li.appendChild(img);
                                 li.appendChild(trackName);
+                                li.appendChild(playButton);
+                                li.appendChild(audio);
 
                                 // 트랙 리스트에 li 추가
                                 trackList.appendChild(li);

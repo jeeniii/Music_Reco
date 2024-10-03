@@ -31,7 +31,8 @@ def artist_top_tracks(artist_ids):
                 'name': top_track['name'],
                 'id': top_track['id'],
                 'image_url': top_track['album']['images'][-1]['url'] if top_track['album']['images'] else '',
-                'popularity': top_track['popularity']
+                'popularity': top_track['popularity'],
+                'preview_url': top_track.get('preview_url', ''),
             }
             tracks.append(top_track_data)
         # dictionary[key] = value
