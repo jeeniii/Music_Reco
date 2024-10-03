@@ -61,6 +61,7 @@
         <ul id="trackList">
             <!-- 트랙 데이터 삽입 -->
         </ul>
+        <button id="submitTracksButton" class="mt-4 bg-blue-500 text-white p-2 rounded hidden">선택 완료</button>
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -68,8 +69,12 @@
             const actionButton = document.getElementById("actionButton");
             const trackList = document.getElementById("trackList");
             const tracksContainer = document.getElementById("tracksContainer");
+            const submitTracksButton = document.getElementById("submitTracksButton");  // 선택 완료 버튼 요소 추가
+            const maxSelectedTracks = 5;  
             const maxSelectedList = 3;
-            let selectedItems = [];
+            
+            let selectedItems = []; // 선택된 artist ID를 저장
+            let selectedTracks = []; // 선택된 track ID를 저장
             
             artistsList.addEventListener("click", function(event) {
                 const clickedItem = event.target.closest('li');
