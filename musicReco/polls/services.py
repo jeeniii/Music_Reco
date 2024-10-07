@@ -39,3 +39,17 @@ def artist_top_tracks(artist_ids):
         artist_tracks[artist_id] = tracks
     return artist_tracks
 
+def recommendations(track_ids, limit=20):
+    recommend_tracks = []
+    search_tracks = sp.recommendations(seed_tracks=track_ids, market='KR', limit=limit)
+    for get_searched_track in search_tracks['tracks']:
+        get_searched_tracks = {
+            'artist': get_searched_track['artists'][0]['name'],
+            'name': get_searched_track['name'],
+            'images': get_searched_track['album']['images'][-1]['url'] if get_searched_track['album']['images'] else '',
+            'preview_url': get_searched_track.get('preview_url', ''),
+        }
+        recommend_tracks.append(get_searched_tracks)
+    return recommend_tracks
+
+    

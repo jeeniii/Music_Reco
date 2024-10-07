@@ -1,7 +1,7 @@
 import json
 from django.shortcuts import render
 from django.http import JsonResponse
-from .services import search_artists, artist_top_tracks
+from .services import search_artists, artist_top_tracks, recommendations
 
 # Create your views here.
 
@@ -23,4 +23,18 @@ def get_tracks(request):
 
         return JsonResponse({'tracks': all_tracks})
         
+    return JsonResponse({'error': 'Invalid Request'}, status=400)
+
+def recommand_tracks(request):
+    print('##views.py까지 도착##')
+    if request.method == 'POST':
+        body = json.loads(request.body)
+        # 선택된 tracks ID 가져오기
+        track_ids = body.get('track_ids',[])
+        print('##tracks_ids 출력##: ', track_ids)
+        recommand_all_tracks = recommendations(track_ids)
+        print('##recommand_all_tracks 출력##: ', recommand_all_tracks)
+
+        return JsonResponse({'recommand_all_tracks': recommand_all_tracks})
+    
     return JsonResponse({'error': 'Invalid Request'}, status=400)
