@@ -6,13 +6,13 @@ from .services import search_artists, artist_top_tracks, recommendations
 # Create your views here.
 
 def index(request):
-    query = request.GET.get('search')
+    query = request.GET.get('search','')
     artists = []  # services.py에서 정의한 함수 호출
     
     if query:
         artists = search_artists(query)
     
-    return render(request, 'index.html', {'artists': artists})
+    return render(request, 'index.html', {'artists': artists, 'query': query})
 
 def get_tracks(request):
     if request.method == 'POST':
@@ -25,16 +25,16 @@ def get_tracks(request):
         
     return JsonResponse({'error': 'Invalid Request'}, status=400)
 
-def recommand_tracks(request):
+def recommend_tracks(request):
     print('##views.py까지 도착##')
     if request.method == 'POST':
         body = json.loads(request.body)
         # 선택된 tracks ID 가져오기
         track_ids = body.get('track_ids',[])
         print('##tracks_ids 출력##: ', track_ids)
-        recommand_all_tracks = recommendations(track_ids)
-        print('##recommand_all_tracks 출력##: ', recommand_all_tracks)
+        recommend_all_tracks = recommendations(track_ids)
+        print('##recommend_all_tracks 출력##: ', recommend_all_tracks)
 
-        return JsonResponse({'recommand_all_tracks': recommand_all_tracks})
+        return JsonResponse({'recommend_all_tracks': recommend_all_tracks})
     
     return JsonResponse({'error': 'Invalid Request'}, status=400)

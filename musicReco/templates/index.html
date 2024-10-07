@@ -6,6 +6,7 @@
     <title>가수 검색</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
@@ -27,10 +28,13 @@
 <body class="bg-gray-100 p-6">
     <!-- 가수 선택 -->
     <div id="artistSelectionContainer" class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-6">
+        <div class="mb-4">
+            <i class="fas fa-arrow-left cursor-pointer" id="backButton"></i> <!-- 뒤로가기 아이콘 -->
+        </div>
         <h1 class="text-2xl font-bold mb-4 text-center">가수 검색</h1>
         <div class="relative mb-6">
             <form method="GET" action="">
-                <input type="text" name="search" placeholder="검색" class="w-full border border-gray-300 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" onKeyPress="if (event.keyCode==13) { form.submit(); }">
+                <input type="text" name="search" placeholder="검색" value="{{ query }}" class="w-full border border-gray-300 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" onKeyPress="if (event.keyCode==13) { form.submit(); }">
             </form>
             <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.387 4.387a1 1 0 01-1.414 1.414l-4.387-4.387zM8 14a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd" />
@@ -57,6 +61,9 @@
     </div>
     <!-- 선택한 가수의 음악 리스트 -->
     <div id="tracksContainer" class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-6 hidden">
+        <div class="mb-4">
+            <i class="fas fa-arrow-left cursor-pointer" id="backButtonTrack"></i> <!-- 뒤로가기 아이콘 -->
+        </div>
         <h1 class="text-2xl font-bold mb-4 text-center">음악 선택</h1>
         <ul id="trackList">
             <!-- 트랙 데이터 삽입 -->
@@ -64,6 +71,15 @@
         <div class="mt-4 flex justify-center">
             <button id="submitTracksButton" class="mt-4 bg-blue-500 text-white p-2 rounded hidden">선택 완료</button>
         </div>
+    </div>
+    <div id="recommendTracksContainer" class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-6 hidden">
+        <div class="mb-4">
+            <i class="fas fa-arrow-left cursor-pointer" id="backButtonRecommend"></i> <!-- 뒤로가기 아이콘 -->
+        </div>
+        <h1 class="text-2xl font-bold mb-4 text-center">음악 추천</h1>
+        <ul id="recommendTrackList">
+            <!-- 트랙 데이터 삽입 -->
+        </ul>
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -77,7 +93,33 @@
             
             let selectedItems = []; // 선택된 artist ID를 저장
             let selectedTracks = []; // 선택된 track ID를 저장
-            
+
+            // 가수 선택 페이지 뒤로가기
+            const backButton = document.getElementById('backButton');
+            if(backButton) {
+                backButton.addEventListener('click', function() {
+                    window.history.back();
+                });
+            }
+
+            // 트랙 선택 페이지 뒤로가기
+            const backButtonTrack = document.getElementById('backButtonTrack');
+            if(backButtonTrack) {
+                backButtonTrack.addEventListener('click', function() {
+                    tracksContainer.classList.add('hidden');
+                    artistSelectionContainer.classList.remove('hidden');
+                });
+            }
+
+            // 추천 음악 선택 페이지 뒤로가기
+            const backButtonRecommend = document.getElementById('backButtonRecommend');
+            if(backButtonRecommend) {
+                backButtonRecommend.addEventListener('click', function() {
+                    recommendTracksContainer.classList.add('hidden');
+                    tracksContainer.classList.remove('hidden');
+                });
+            }
+
             artistsList.addEventListener("click", function(event) {
                 const clickedItem = event.target.closest('li');
 
@@ -101,7 +143,7 @@
                             selectedItems.push(clickedItem);
                         }
                     } 
-
+                    
                     if (selectedItems.length > 0) {
                         actionButton.style.display = 'inline-block';
                     } else {
@@ -230,7 +272,7 @@
             });
 
             submitTracksButton.addEventListener('click', function(){
-                fetch('/recommand_tracks/', {
+                fetch('/recommend_tracks/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -240,7 +282,80 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert('트랙이 성공적으로 전송됨');
+                    // 트랙 선택 화면 숨김 처리
+                    tracksContainer.classList.add('hidden');
+
+                    // recommendTracksContainer에 접근
+                    const recommendTracksContainer = document.getElementById('recommendTracksContainer');
+                    const recommendTracksList = recommendTracksContainer.querySelector('#recommendTrackList');
+
+                    // 기존 트랙 리스트 초기화
+                    recommendTracksList.innerHTML='';
+
+                    // 추천 트랙 리스트 출력
+                    data.recommend_all_tracks.forEach(track => {
+                        const li = document.createElement('li');
+                        li.classList.add('flex', 'item-center', 'justify-between', 'mb-4');
+                        li.setAttribute('data-track-id', track.id)
+
+                        // 트랙 이미지
+                        const img = document.createElement('img');
+                        img.src = track.images
+                        img.alt = track.name; //이미지 없을 경우 텍스트
+                        img.classList.add('w-12', 'h-12', 'rounded-full', 'mr-4');
+
+                        // div 박스 생성
+                        const trackInfo = document.createElement('div');
+                        trackInfo.classList.add('flex', 'flex-col', 'mr-4');
+
+                        // 트랙 이름
+                        const trackName = document.createElement('p');
+                        trackName.classList.add('font-bold', 'text-lg');
+                        trackName.textContent = track.name;
+
+                        // 아디스트 이름
+                        const artistName = document.createElement('p');
+                        artistName.classList.add('font-light', 'text-sm');
+                        artistName.textContent = track.artist;
+
+                        // 30초 듣기
+                        const playButton = document.createElement('button');
+                        if (track.preview_url === '') {
+                            playButton.innerHTML = '❌';
+                            playButton.disabled = true;
+                            playButton.classList.add('ml-auto');
+                        } else {
+                            playButton.innerHTML = '▶';
+                            playButton.classList.add('play-button', 'ml-auto')
+                        }
+
+                        // 오디오 url
+                        const audio = document.createElement('audio');
+                        audio.src = track.preview_url;
+                        audio.classList.add('hidden');
+
+                        playButton.addEventListener('click', function() {
+                            if (audio.paused) {
+                                audio.play();
+                                playButton.innerHTML = '⏸️';
+                            } else {
+                                audio.pause();
+                                playButton.innerHTML = '▶';
+                            }
+                        });
+
+                        // div 박스에 아티스트 이름, 트랙 이름 배치
+                        trackInfo.appendChild(trackName);
+                        trackInfo.appendChild(artistName);
+
+                        li.appendChild(img);
+                        li.appendChild(trackInfo);
+                        li.appendChild(playButton);
+                        li.appendChild(audio);
+
+                        recommendTrackList.appendChild(li);
+                    });
+                    recommendTracksContainer.classList.remove('hidden');
                 })
                 .catch(error => {
                     console.error('AJAX 요청 중 오류', error);
