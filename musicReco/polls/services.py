@@ -32,7 +32,6 @@ def artist_top_tracks(artist_ids):
                 'id': top_track['id'],
                 'image_url': top_track['album']['images'][-1]['url'] if top_track['album']['images'] else '',
                 'popularity': top_track['popularity'],
-                'preview_url': top_track.get('preview_url', ''),
             }
             tracks.append(top_track_data)
         # dictionary[key] = value
@@ -47,7 +46,7 @@ def recommendations(track_ids, limit=20):
             'artist': get_searched_track['artists'][0]['name'],
             'name': get_searched_track['name'],
             'images': get_searched_track['album']['images'][-1]['url'] if get_searched_track['album']['images'] else '',
-            'preview_url': get_searched_track.get('preview_url', ''),
+            'popularity': get_searched_track['popularity'],
         }
         recommend_tracks.append(get_searched_tracks)
     return recommend_tracks

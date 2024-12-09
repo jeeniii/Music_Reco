@@ -215,31 +215,38 @@
                                 trackName.classList.add('font-bold');
                                 trackName.textContent = track.name;
 
-                                // 재생 아이콘 preview_url이 비어있는 경우를 분기
-                                const playButton = document.createElement('button');
-                                if (track.preview_url === '') {
-                                    playButton.innerHTML = '❌';
-                                    playButton.disabled = true;
-                                    playButton.classList.add('ml-auto');
-                                } else {
-                                    playButton.innerHTML = '▶';
-                                    playButton.classList.add('play-button', 'ml-auto');
-                                }
-                                
-                                //오디오 url
-                                const audio = document.createElement('audio');
-                                audio.src = track.preview_url;
-                                audio.classList.add('hidden');
+                                // 인기도와 별점
+                                const trackPopularity = document.createElement('p');
+                                trackPopularity.classList.add('text-sm', 'text-gray-500');
+                                const stars = "★".repeat(Math.round(track.popularity / 20)) + "☆".repeat(5 - Math.round(track.popularity / 20));
+                                trackPopularity.textContent = `인기도: ${track.popularity} | ${stars}`;
 
-                                playButton.addEventListener('click', function() {
-                                    if (audio.paused) {
-                                        audio.play();
-                                        playButton.innerHTML = '⏸️';
-                                    } else {
-                                        audio.pause();
-                                        playButton.innerHTML = '▶';
-                                    }
-                                });
+                                // 재생 아이콘 preview_url이 비어있는 경우를 분기
+                                // deprecated 기능
+                                // const playButton = document.createElement('button');
+                                // if (track.preview_url === '') {
+                                //     playButton.innerHTML = '❌';
+                                //     playButton.disabled = true;
+                                //     playButton.classList.add('ml-auto');
+                                // } else {
+                                //     playButton.innerHTML = '▶';
+                                //     playButton.classList.add('play-button', 'ml-auto');
+                                // }
+                                
+                                // //오디오 url
+                                // const audio = document.createElement('audio');
+                                // audio.src = track.preview_url;
+                                // audio.classList.add('hidden');
+
+                                // playButton.addEventListener('click', function() {
+                                //     if (audio.paused) {
+                                //         audio.play();
+                                //         playButton.innerHTML = '⏸️';
+                                //     } else {
+                                //         audio.pause();
+                                //         playButton.innerHTML = '▶';
+                                //     }
+                                // });
 
                                 // 체크박스 생성
                                 const checkbox = document.createElement('input');
@@ -252,8 +259,9 @@
                                 // li에 img, name 추가
                                 li.appendChild(img);
                                 li.appendChild(trackName);
-                                li.appendChild(playButton);
-                                li.appendChild(audio);
+                                // li.appendChild(playButton); // deprecated
+                                // li.appendChild(audio); // deprecated
+                                li.appendChild(trackPopularity);
                                 li.appendChild(checkbox);
 
                                 // 트랙 리스트에 li 추가
@@ -320,31 +328,39 @@
                         artistName.classList.add('font-light', 'text-sm');
                         artistName.textContent = track.artist;
 
+                        // 인기도와 별점
+                        const trackPopularity = document.createElement('p');
+                        trackPopularity.classList.add('text-sm', 'text-gray-500');
+                        const stars = "★".repeat(Math.round(track.popularity / 20)) + "☆".repeat(5 - Math.round(track.popularity / 20));
+                        trackPopularity.textContent = `인기도: ${track.popularity} | ${stars}`;
+
                         // 30초 듣기
-                        const playButton = document.createElement('button');
-                        if (track.preview_url === '') {
-                            playButton.innerHTML = '❌';
-                            playButton.disabled = true;
-                            playButton.classList.add('ml-auto');
-                        } else {
-                            playButton.innerHTML = '▶';
-                            playButton.classList.add('play-button', 'ml-auto')
-                        }
+                        // deprecated 기능
+                        // const playButton = document.createElement('button');
+                        // if (track.preview_url === '') {
+                        //     playButton.innerHTML = '❌';
+                        //     playButton.disabled = true;
+                        //     playButton.classList.add('ml-auto');
+                        // } else {
+                        //     playButton.innerHTML = '▶';
+                        //     playButton.classList.add('play-button', 'ml-auto')
+                        // }
 
-                        // 오디오 url
-                        const audio = document.createElement('audio');
-                        audio.src = track.preview_url;
-                        audio.classList.add('hidden');
+                        // // 오디오 url
+                        // const audio = document.createElement('audio');
+                        // audio.src = track.preview_url;
+                        // audio.classList.add('hidden');
 
-                        playButton.addEventListener('click', function() {
-                            if (audio.paused) {
-                                audio.play();
-                                playButton.innerHTML = '⏸️';
-                            } else {
-                                audio.pause();
-                                playButton.innerHTML = '▶';
-                            }
-                        });
+                        // playButton.addEventListener('click', function() {
+                        //     if (audio.paused) {
+                        //         audio.play();
+                        //         playButton.innerHTML = '⏸️';
+                        //     } else {
+                        //         audio.pause();
+                        //         playButton.innerHTML = '▶';
+                        //     }
+                        // });
+
 
                         // div 박스에 아티스트 이름, 트랙 이름 배치
                         trackInfo.appendChild(trackName);
@@ -352,8 +368,9 @@
 
                         li.appendChild(img);
                         li.appendChild(trackInfo);
-                        li.appendChild(playButton);
-                        li.appendChild(audio);
+                        // li.appendChild(playButton); // deprecated
+                        // li.appendChild(audio); 
+                        li.appendChild(trackPopularity);
 
                         recommendTrackList.appendChild(li);
                     });
@@ -361,6 +378,28 @@
                 })
                 .catch(error => {
                     console.error('AJAX 요청 중 오류', error);
+
+                    // 오류 이미지 띄우기
+                    const errorImage = document.createElement('img');
+                    errorImage.src = "{% static 'images/deprecated.png' %}";  // 오류 이미지 경로 설정
+                    errorImage.alt = "오류 발생";
+                    errorImage.classList.add('mx-auto', 'mt-4');  // Tailwind로 이미지 스타일링
+
+                    const errorContainer = document.createElement('div');
+                    errorContainer.classList.add('text-center', 'mt-6');
+                    errorContainer.appendChild(errorImage);
+
+                    // 오류 메시지 출력
+                    const errorMessage = document.createElement('p');
+                    errorMessage.innerHTML = "음악 추천 기능은 Spotify 정책으로 인해 사라졌습니다.<br>빠른 기일 내에 다른 기능으로 대체하겠습니다.";
+                    errorMessage.classList.add('text-red-500', 'mt-2');
+
+                    errorContainer.appendChild(errorMessage);
+
+                    // 기존 화면 지우고 에러 화면 표시
+                    const mainContainer = document.getElementById('tracksContainer');
+                    mainContainer.innerHTML = ''; // 기존 컨텐츠 삭제
+                    mainContainer.appendChild(errorContainer);
                 });
             });
         });
